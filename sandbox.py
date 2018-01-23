@@ -1,16 +1,12 @@
-
 from wallet_app import *
 
 try:
     # import tkinter as tk
     from tkinter import *
-    
-except ImportError :
+
+except ImportError:
     # import Tkinter as tk
-    from  Tkinter import *
-
-
-
+    from Tkinter import *
 
 
 class AppGUI(Frame):
@@ -80,7 +76,7 @@ class AppGUI(Frame):
         self.del_category_btn = Button(self, text="Del Category", command=self.del_cat)
         self.del_category_btn.grid(row=8, column=2)
 
-        self.del_transaction_btn = Button(self,text="Del last transaction",command=self.del_tr )
+        self.del_transaction_btn = Button(self, text="Del last transaction", command=self.del_tr)
         self.del_transaction_btn.grid(row=12, column=2)
         # 0ther buttons--------------------------------------------------------
         self.quit = Button(self, text="QUIT", command=self.master.destroy)
@@ -113,45 +109,53 @@ class AppGUI(Frame):
                 wallet.account_list[self.account_listbox.get(self.account_listbox.curselection(), last=None)])
 
         callback_event(e=None)
-        self.display_transaction((sorted(wallet.transaction_list.keys(), reverse=True))[0])
         self.account_listbox.bind('<<ListboxSelect>>', callback_event)
-#--------------------------------------------------------------------------------------------
+        try:
+            self.display_transaction((sorted(wallet.transaction_list.keys(), reverse=True))[0])
+        except IndexError:
+            self.display_transaction(transaction=None)
+
+    # --------------------------------------------------------------------------------------------
 
     def check_account(self):
         if ((self.input_account_value.get()).isdigit() and
                 (self.input_account_name.get()).isalpha()):
             self.account_callback()
-        else: self.error_window()
+        else:
+            self.error_window()
 
     def check_category(self):
         if (self.input_category_name.get() not in wallet.category_list.keys() and
-                (self.input_category_name.get()).isalpha()):self.category_callback()
-        else: self.error_window()
+                (self.input_category_name.get()).isalpha()):
+            self.category_callback()
+        else:
+            self.error_window()
 
     def check_transation(self):
-        if (self.input_transaction_value.get()).isdigit():self.transaction_callback()
-        else: self.error_window()
+        if (self.input_transaction_value.get()).isdigit():
+            self.transaction_callback()
+        else:
+            self.error_window()
 
     def error_window(self):
-            self.top = Toplevel(self)
-            self.top.title("Error")
-            self.label_info = Label(self.top, text=("Wrong input,\n"
-                                                       "Please check input fields for correct filling in:\n"
-                                                       "name fields can't containe digits  and value field can't chars\n"
-                                                       "name fields can't contains of already existing object\n"))
-            self.label_info.grid(row=1, column=1)
-            self.back_button = Button(self.top, text="ok", command=self.top.destroy)
-            self.back_button.grid(row=2, column=1)
-
-    def update_window(self,account):
         self.top = Toplevel(self)
-        self.top.title("Account was updated")
-        self.label_info = Label(self.top, text=("%s account value was updated to %s" %
-                                                (account.account_name,account.account_value)))
+        self.top.title("Error")
+        self.label_info = Label(self.top, text=("Wrong input,\n"
+                                                "Please check input fields for correct filling in:\n"
+                                                "name fields can't containe digits  and value field can't chars\n"
+                                                "name fields can't contains of already existing object\n"))
         self.label_info.grid(row=1, column=1)
         self.back_button = Button(self.top, text="ok", command=self.top.destroy)
         self.back_button.grid(row=2, column=1)
 
+    def update_window(self, account):
+        self.top = Toplevel(self)
+        self.top.title("Account was updated")
+        self.label_info = Label(self.top, text=("%s account value was updated to %s" %
+                                                (account.account_name, account.account_value)))
+        self.label_info.grid(row=1, column=1)
+        self.back_button = Button(self.top, text="ok", command=self.top.destroy)
+        self.back_button.grid(row=2, column=1)
 
     def account_callback(self):
         entered_value = Decimal(self.input_account_value.get()).quantize(Decimal('0.01'), rounding=ROUND_DOWN)
@@ -159,11 +163,11 @@ class AppGUI(Frame):
         account = Account(entered_name, entered_value)
         if entered_name in wallet.account_list.keys():
             self.update_window(account)
-        else:self.account_listbox.insert(END, entered_name)
+        else:
+            self.account_listbox.insert(END, entered_name)
         wallet.add_account(account)
-        self.display_account(wallet.account_list[entered_name])
+        # self.display_account(wallet.account_list[entered_name])
         wallet.save_to_file('accounts.json', wallet.account_list)
-
 
     def transaction_callback(self):
 
@@ -189,11 +193,14 @@ class AppGUI(Frame):
         wallet.save_to_file('categories.json', wallet.category_list)
 
     def display_transaction(self, transaction):
-        self.transaction_display['text'] = "%s:" % transaction
-        for k, v in sorted(wallet.transaction_list[transaction].items(),reverse=True):
-            self.transaction_display['text'] += "\n%s:%s" % (k, v)
         self.transaction_display['fg'] = '#42f477'
         self.transaction_display['bg'] = "#000000"
+        if transaction:
+            self.transaction_display['text'] = "%s:" % transaction
+            for k, v in sorted(wallet.transaction_list[transaction].items(), reverse=True):
+                self.transaction_display['text'] += "\n%s:%s" % (k, v)
+        else:
+            self.transaction_display['text'] = 'There \n are \n no transactions'
 
     def display_account(self, account):
         self.account_display['text'] = "%s UAH" % account
@@ -201,19 +208,22 @@ class AppGUI(Frame):
         self.account_display['bg'] = "#000000"
 
     def del_ac(self):
-        del(wallet.account_list[self.account_listbox.get(self.account_listbox.curselection(), last=None)])
+        del (wallet.account_list[self.account_listbox.get(self.account_listbox.curselection(), last=None)])
         wallet.save_to_file('accounts.json', wallet.account_list)
         self.account_listbox.delete(self.account_listbox.curselection(), last=None)
 
     def del_cat(self):
-        del(wallet.category_list[self.category_listbox.get(self.category_listbox.curselection(), last=None)])
+        del (wallet.category_list[self.category_listbox.get(self.category_listbox.curselection(), last=None)])
         wallet.save_to_file('categories.json', wallet.category_list)
         self.category_listbox.delete(self.category_listbox.curselection()[0])
 
     def del_tr(self):
-        del(wallet.transaction_list[(sorted(wallet.transaction_list.keys(), reverse=True))[0]])
-        wallet.save_to_file('transactions.json',wallet.transaction_list)
-        self.display_transaction(sorted(wallet.transaction_list.keys(), reverse=True)[0])
+        del (wallet.transaction_list[(sorted(wallet.transaction_list.keys(), reverse=True))[0]])
+        wallet.save_to_file('transactions.json', wallet.transaction_list)
+        try:
+            self.display_transaction((sorted(wallet.transaction_list.keys(), reverse=True))[0])
+        except IndexError:
+            self.display_transaction(transaction=None)
 
     def transaction_window(self):
 
@@ -221,25 +231,25 @@ class AppGUI(Frame):
         self.top.title("View all transactions")
         self.scroll = Scrollbar(self.top)
         self.scroll.grid(row=2, column=2, sticky='NSW')
-        self.transaction_textbox = Text(self.top,font = "Arial", width ="30", yscrollcommand=self.scroll.set)
+        self.transaction_textbox = Text(self.top, font="Arial", width="30", yscrollcommand=self.scroll.set)
         self.transaction_textbox.grid(row=2, column=1)
         self.back_button = Button(self.top, text="Back", command=self.top.destroy)
         self.back_button.grid(row=3, column=1)
         self.label = Label(self.top)
         self.label.grid(row=2, column=3)
         self.scroll.config(command=self.transaction_textbox.yview)
-        self.entry = Entry(self.top,width=38)
-        self.entry.grid(row=1,column=1)
-        self.search_button = Button(self.top,text="Search",command=self.search)
-        self.search_button.grid(row=1,column=3)
+        self.entry = Entry(self.top, width=38)
+        self.entry.grid(row=1, column=1)
+        self.search_button = Button(self.top, text="Search", command=self.search)
+        self.search_button.grid(row=1, column=3)
 
-    def transaction_view(self,tuple_list):
+    def transaction_view(self, tuple_list):
         total = 0
-        for key, value in sorted(tuple_list,reverse=True):
+        for key, value in sorted(tuple_list, reverse=True):
             self.transaction_textbox.insert(END, "\n" + key + ":\n")
             for k, v in value.items():
                 text_row = (" %s:%s\n") % (k, v)
-                if k =="value":
+                if k == "value":
                     total += Decimal(v).quantize(Decimal('0.01'), rounding=ROUND_DOWN)
                 self.transaction_textbox.insert(END, text_row)
         self.label["text"] = 'Total:\n %s UAH' % total
@@ -265,7 +275,7 @@ class AppGUI(Frame):
 
     def __init__(self, master=None):
 
-        Frame.__init__(self,master)
+        Frame.__init__(self, master)
         self.grid()
         self.create_widgets()
 

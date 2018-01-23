@@ -18,6 +18,7 @@ class Account(object):
         self.account_name = name
         self.account_value = value
 
+
 class Transaction(object):
     # var name always is string, var value is number, account is object of Account class
     def __init__(self, value, account,category):
@@ -25,6 +26,7 @@ class Transaction(object):
         self.transaction_value = value
         self.transaction_account = account
         self.category = category
+
 
 class Wallet(object):
     transaction_list = {}
@@ -54,8 +56,13 @@ class Wallet(object):
             data_loaded = json.load(data_file)
         return data_loaded
 
+
 wallet = Wallet()
 
 wallet.category_list = wallet.read_from_file('categories.json')
 wallet.transaction_list = wallet.read_from_file('transactions.json')
 wallet.account_list = wallet.read_from_file('accounts.json')
+if not wallet.account_list:
+    wallet.account_list['cash(default)'] = '0.00'
+if not wallet.category_list:
+    wallet.category_list['transport(default)'] = None
