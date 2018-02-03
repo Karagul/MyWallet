@@ -282,4 +282,6 @@ class AppGUI(Frame):
 
 root = Tk()
 app = AppGUI(master=root)
-app.mainloop()
+
+if __name__ == '__main__':
+    app.mainloop()
