@@ -2,7 +2,7 @@
 Simple tkinter-gui app for finances control
 
 ## Install
-Just clone repo to your machine, olso you need tkinter module for your python interpreter
+Just clone repo to your machine, also you need tkinter module for your python interpreter
 
 for Ubuntu:
 ###   sudo apt-get install python-tk or 
